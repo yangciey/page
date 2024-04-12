@@ -1,5 +1,5 @@
 <template>
-  <div class="overall" @mouseleave="mouseLeave" @mouseenter="mouseEnter">
+  <div class="overall" @mouseleave="mouseLeave">
     <div
       class="dot"
       ref="dot"
@@ -60,6 +60,8 @@ const state = reactive({
   h: window.innerHeight,
   dt_wh: 6,
   bk_wh: 38,
+  multipleX: 1,
+  multipleY: 1,
 });
 const handleClick = (v) => {
   state.tabSelect = v;
@@ -93,7 +95,7 @@ const handleClick = (v) => {
       break;
   }
 };
-const MouseMove = () => {
+const MouseMove = (el, cl) => {
   let dt = document.querySelector(".dot");
   let bk = document.querySelector(".bck");
   let dt_wh = state.dt_wh / 2;
@@ -112,7 +114,22 @@ const MouseMove = () => {
       x: x - bk_wh - state.w / 2,
       y: y - bk_wh - state.h / 2,
     });
-    if (state.w > x + 6 || state.h > y + 6 || x >= 5 || y >= 5) {
+    let o = document.querySelector(el);
+    for (let e = 0; e < o.length; e++) {
+      o[e].onmouseenter = function () {
+        gsap.to(bk, {
+          duration: 0.3,
+          x: x - bk_wh,
+          y: y - bk_wh,
+          scale: 0.8,
+        });
+        dt.classList.add("incursor-dot");
+        bk.classList.add(cl);
+      };
+    }
+    if (state.w <= x + 6 || state.h <= y + 6 || x < 6 || y < 6) {
+      dt.style.opacity = 0;
+    } else {
       dt.style.opacity = 1;
       bk.style.opacity = 1;
     }
@@ -164,10 +181,6 @@ const mouseClick = () => {
 const mouseLeave = () => {
   let dt = document.querySelector(".dot");
   dt.style.opacity = 0;
-};
-const mouseEnter = () => {
-  let dt = document.querySelector(".dot");
-  dt.style.opacity = 1;
 };
 const handleWheel = (v) => {
   // console.log("定时器状态--false", state.isScroll);
@@ -232,12 +245,26 @@ const handleWheel = (v) => {
     }, 1000);
   }
 };
+const resize = () => {
+  window.addEventListener("resize", function (e) {
+    console.log(e.target.innerHeight, e.target.innerWidth);
+    state.w = e.target.innerWidth;
+    state.h = e.target.innerHeight;
+    MouseMove(".tab", "incursor-bck");
+    mouseClick();
+  });
+};
 onMounted(() => {
-  MouseMove();
-  let dt = document.querySelector(".dot");
-  dt.style.opacity = 1;
+  resize();
+  MouseMove(".tab", "incursor-bck");
   mouseClick();
 });
+watch(
+  () => [state.w, state.h],
+  (n, o) => {
+    console.log("??????", n, o);
+  }
+);
 </script>
 <style lang="scss" scoped>
 .overall {
@@ -327,5 +354,9 @@ onMounted(() => {
       }
     }
   }
+}
+.incursor-bck {
+  border: 1px solid transparent;
+  background: #fff;
 }
 </style>
