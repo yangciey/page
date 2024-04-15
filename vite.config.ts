@@ -40,7 +40,7 @@ export default defineConfig({
     }
   },
   server: {
-    host: "192.168.0.21",//本机IP地址
+    // host: "192.168.0.21",//本机IP地址
     port: 8080,
     open: true,
     proxy: {
